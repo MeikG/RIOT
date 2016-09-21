@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+
+  <head>
+    <title>OHMS</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-title" content="OHMS">
+    <!--[if IE]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-history-api/4.2.4/history.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <app-main class = "page-padding"></app-main>
+    <app-navi></app-navi>
+    <element-login></element-login>
+    <element-notification></element-notification>
+
+    <!-- riot tags -->
+    <script type="riot/tag" src="/tags/router.tag"></script>
+    <script type="riot/tag" src="/tags/app-navi.tag"></script>
+    <script type="riot/tag" src="/tags/pageloader.tag"></script>
+    <script type="riot/tag" src="/tags/homepage.tag"></script>
+    <script type="riot/tag" src="/tags/recipes.tag"></script>
+    <script type="riot/tag" src="/tags/elements/login.tag"></script>
+    <script type="riot/tag" src="/tags/elements/notification.tag"></script>
+    <script type="riot/tag" src="/tags/elements/pageheader.tag"></script>
+    <script type="riot/tag" src="/tags/elements/renderer-recipes-grid.tag"></script>
+    <script type="riot/tag" src="/tags/elements/renderer-recipes-list.tag"></script>
+    <script type="riot/tag" src="/tags/error/404.tag"></script>
+
+    <!-- scripts we need -->
+    <script src="/lib/riotcontrol.js"></script>
+    <!-- Include our stores -->
+    <script src="/lib/store/RecipeStore.js"></script>
+    <script src="/lib/store/UserStore.js"></script>
+    <script src="/lib/store/NotificationStore.js"></script>
+
+    <script src="/lib/riotcompiler.min.js"></script>
+    <script src="/lib/library.js"></script>
+    <script src="/config.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/global.css">
+    <script src=https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/2.0.1/async.min.js" integrity="sha256-EcShzhTKxrp3n7bXqO/ENpkZA34nHqfXl+H2C1kgHgI=" crossorigin="anonymous"></script>
+    <script src="/lib/jquery-jsonp.js"></script>
+
+    <script>
+      var config = new config();
+      var path = new path();
+
+      // TODO: Pre-compile the Riot tags pre-deployment.
+      riot.compile(function() {
+        riot.route.base('/');
+        riot.mount('*');
+        riot.route.start(true);
+      });
+    </script>
+
+    <script>
+      // TODO: Develop the service worker. Currently disabled during development.
+      if ('serviceWorker' in navigator && false) {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function(registration) {
+          // Registration was successful
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }).catch(function(err) {
+          // registration failed :(
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      }
+      // /store/RecipeStore.js
+      RiotControl.addStore(new RecipeStore());
+      // /store/UserStore.js
+      RiotControl.addStore(new UserStore());
+      // /store/NotificationStore.js
+      RiotControl.addStore(new NotificationStore());
+
+      var user = {};
+      RiotControl.on('userstore_changed', function (userStore) {
+        // When the user store is updated, reflect it within a global variable.
+        user = userStore;
+      });
+
+      RiotControl.trigger('userstore_init');
+    </script>
+
+    <script>
+      /* These functions are required to be global to this app for our event listeners */
+      // Load recipes on scroll.
+      var loadrecipes = function () {
+        if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
+          RiotControl.trigger('get_recipes', riot.route.query().mode, true);
+        }
+      };
+    </script>
+
+    <style>
+      p {
+        text-align: justify;
+      }
+      body {
+        margin: 0
+      }
+      app-main {
+        display: block;
+      }
+    </style>
+  </body>
+
+</html>
